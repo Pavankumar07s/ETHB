@@ -1,0 +1,46 @@
+{
+  "name": "v1",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npx tsc -b",
+    "dev": "npx tsc -b && node dist/index.js",
+    "start": "node dist/index.js",
+    "postinstall": "npx tsc -b"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@1inch/cross-chain-sdk": "^1.0.2",
+    "@1inch/fusion-sdk": "^2.3.8",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/mongoose": "^5.11.96",
+    "@types/nodemailer": "^7.0.1",
+    "@types/uuid": "^10.0.0",
+    "axios": "^1.12.1",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.2.2",
+    "ethers": "^6.15.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.1",
+    "nodemailer": "^7.0.6",
+    "typescript": "^5.9.2",
+    "uuid": "^13.0.0",
+    "zod": "^4.1.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3"
+  }
+}
