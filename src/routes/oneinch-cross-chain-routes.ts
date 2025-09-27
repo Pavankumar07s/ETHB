@@ -111,10 +111,43 @@ router.use("/", async (req, res) => {
       const oneInchOrderMerchantAsset = oneInchOrder.takerAsset;
       const oneInchOrderMerchantAmount = Number(oneInchOrder.takingAmount);
 
+      // Validate cross-chain order parameters
+      if (merchantOrder) {
+        console.log("Cross-chain order validation:", {
+          buyerChain: oneinchOrderBuyerChain,
+          merchantChain: merchantorderinChain,
+          buyerAsset: oneinchOrderBuyerAsset,
+          merchantAsset: oneInchOrderMerchantAsset,
+          receiver: oneInchorderMerchantAddress,
+          merchantOrderUuid: merchantOrderUid
+        });
+
+        // Validate that destination chain matches merchant's expected chain
+        if (merchantorderinChain && req.body.dstChainId && req.body.dstChainId !== merchantorderinChain) {
+          console.error("Chain mismatch:", {
+            expectedDestChain: merchantorderinChain,
+            actualDestChain: req.body.dstChainId
+          });
+        }
+
+        // Validate that destination token matches merchant's expected token
+        if (merchantOrderOutToken && oneInchOrderMerchantAsset && 
+            merchantOrderOutToken.toLowerCase() !== oneInchOrderMerchantAsset.toLowerCase()) {
+          console.error("Token mismatch:", {
+            expectedToken: merchantOrderOutToken,
+            actualToken: oneInchOrderMerchantAsset
+          });
+        }
+      }
+
       console.log("starting to fetch price for cross-chain order");
+      
+      // Use the correct buyer chain from the request
+      const buyerChainId = oneinchOrderBuyerChain || req.body.srcChainId;
+      
       const [oneInchOrderBuyerAssetUsdprice] = Object.values(
         await getUsdPrice(
-          Number(oneinchOrderBuyerChain),
+          Number(buyerChainId),
           oneinchOrderBuyerAsset,
           "USD"
         )
@@ -130,29 +163,48 @@ router.use("/", async (req, res) => {
         "Cross-chain order - oneInchOrderMerchantAsset",
         oneInchOrderMerchantAsset
       );
+      console.log(
+        "Cross-chain order - buyerChainId",
+        buyerChainId
+      );
 
-      // Cross-chain specific validation logic can be added here
-      // For example, verify that source and destination chains are different
+      // Cross-chain specific validation logic
       if (
-        oneinchOrderBuyerChain &&
+        buyerChainId &&
         merchantorderinChain &&
-        oneinchOrderBuyerChain === merchantorderinChain
+        buyerChainId === merchantorderinChain
       ) {
         console.warn(
           "Cross-chain route called but chains are the same:",
-          oneinchOrderBuyerChain
+          buyerChainId,
+          "This should use same-chain route instead"
         );
       }
 
       console.log("Cross-chain USD values calculated:", {
         buyerAssetusdtotalvalueUsdValue,
         merchantOrderusdCents,
+        buyerChain: buyerChainId,
+        merchantChain: merchantorderinChain
       });
     }
 
     // Add body for non-GET requests
     if (!/^(GET|HEAD)$/i.test(req.method) && req.body) {
       fetchOptions.body = JSON.stringify(req.body);
+      
+      // Log the request being sent to 1inch for debugging
+      if (req.originalUrl.includes("submit")) {
+        console.log("Submitting cross-chain order to 1inch:", {
+          method: req.method,
+          url: upstream,
+          bodyKeys: Object.keys(req.body),
+          srcChainId: req.body.srcChainId,
+          dstChainId: req.body.dstChainId,
+          quoteId: req.body.quoteId,
+          hasOrder: !!req.body.order
+        });
+      }
     }
 
     const response = await fetch(upstream, fetchOptions);
