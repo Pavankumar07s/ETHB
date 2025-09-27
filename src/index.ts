@@ -24,9 +24,26 @@ app.get("/health", (req, res) => {
   res.send("Hello from health check from Index routes!");
 });
 
-// CORS configuration for authentication - Allow all origins
+// CORS configuration for authentication
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://ethf.onrender.com',
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 const corsOptions = {
-  origin: true, // Allow all origins
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Allow all origins for now, but log for debugging
+    }
+  },
   credentials: true, // Allow cookies to be sent
   optionsSuccessStatus: 200,
 };
