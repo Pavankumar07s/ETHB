@@ -44,7 +44,7 @@ const setTokenCookie = (res: Response, token: string): void => {
   const cookieOptions = {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict" as const,
+    sameSite: process.env.NODE_ENV === "production" ? "none" as const : "strict" as const,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     path: "/",
   };
@@ -57,7 +57,7 @@ const clearTokenCookie = (res: Response): void => {
   res.clearCookie("token", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: process.env.NODE_ENV === "production" ? "none" as const : "strict" as const,
     path: "/",
   });
 };

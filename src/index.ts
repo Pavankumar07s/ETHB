@@ -26,12 +26,23 @@ app.get("/health", (req, res) => {
 
 // CORS configuration for authentication - Allow specific origins
 const corsOptions = {
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://ethf.onrender.com',
-    process.env.FRONTEND_URL || 'https://ethf.onrender.com'
-  ], // Allow specific origins
+  origin: function (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || 'http://localhost:3000',
+      'http://localhost:3000',
+      'https://ethf.onrender.com', // Your production frontend URL
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'), false);
+    }
+  },
   credentials: true, // Allow cookies to be sent
   optionsSuccessStatus: 200,
 };
